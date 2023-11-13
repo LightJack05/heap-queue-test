@@ -1,75 +1,90 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct queue_element
+struct intQueueElement
 {
     int element;
-    struct queue_element *ptrNextElement; // Pointer to the next element in the queue, enqueued later
+    struct intQueueElement *ptrNextElement; // Pointer to the next element in the queue, enqueued later
 };
-struct queue_element *end;   // Pointer last element enqueued
-struct queue_element *start; // Pointer first element in queue
+
+struct intQueue
+{
+    struct intQueueElement *end;   // Pointer to last element enqueued
+    struct intQueueElement *start; // Pointer to first element in queue
+};
 
 /// @brief Check if the Queue is empty
 /// @return 1 if empty, 0 if not
-int isQueueEmpty()
+int intQueue_isQueueEmpty(struct intQueue *queue)
 {
-    return (start == NULL);
+    return (queue->start == NULL);
 }
 
 /// @brief Add an element to the queue
 /// @param element Element to add
-void enQueue(int element)
+void intQueue_enQueue(struct intQueue *queue, int element)
 {
-    struct queue_element *newElement = (struct queue_element *)malloc(sizeof(struct queue_element));
+    struct intQueueElement *newElement = (struct intQueueElement *)malloc(sizeof(struct intQueueElement));
     newElement->element = element;
     newElement->ptrNextElement = NULL;
-    if (isQueueEmpty())
+    if (intQueue_isQueueEmpty(queue))
     {
-        start = newElement;
-        end = newElement;
+        queue->start = newElement;
+        queue->end = newElement;
     }
     else
     {
-        end->ptrNextElement = newElement;
+        queue->end->ptrNextElement = newElement;
     }
-    end = newElement;
+    queue->end = newElement;
 }
 
 /// @brief Remove the first element from the queue
 /// @return The removed element
-int deQueue()
+int intQueue_deQueue(struct intQueue *queue)
 {
-    if (isQueueEmpty())
+    if (intQueue_isQueueEmpty(queue))
     {
         return NULL;
     }
-    if (start->ptrNextElement == NULL)
+    if (queue->start->ptrNextElement == NULL)
     {
-        int lastValue = start->element;
-        free(start);
-        start = NULL;
+        int lastValue = queue->start->element;
+        free(queue->start);
+        queue->start = NULL;
         return lastValue;
     }
-    int startValue = start->element;
-    struct queue_element *newStart = start->ptrNextElement;
-    free(start);
-    start = newStart;
+    int startValue = queue->start->element;
+    struct intQueueElement *newStart = queue->start->ptrNextElement;
+    free(queue->start);
+    queue->start = newStart;
     return startValue;
 }
 
 int main()
 {
-    start = NULL;
-    enQueue(5);
-    enQueue(6);
-    enQueue(4);
+    struct intQueue *queueOne = (struct intQueue *)malloc(sizeof(struct intQueue));
+    queueOne->start = NULL;
+    intQueue_enQueue(queueOne, 5);
+    intQueue_enQueue(queueOne, 6);
+    intQueue_enQueue(queueOne, 4);
 
-    printf("%d\n", deQueue());
-    printf("%d\n", deQueue());
-    printf("%d\n", deQueue());
+    struct intQueue *queueTwo = (struct intQueue *)malloc(sizeof(struct intQueue));
+    queueTwo->start = NULL;
+    intQueue_enQueue(queueTwo, 2);
+    intQueue_enQueue(queueTwo, 4);
+    intQueue_enQueue(queueTwo, 15);
 
-    enQueue(10);
+    printf("%d\n", intQueue_deQueue(queueOne));
+    printf("%d\n", intQueue_deQueue(queueOne));
+    printf("%d\n", intQueue_deQueue(queueOne));
 
-    printf("%d\n", deQueue());
-    printf("%d\n", deQueue());
+    printf("%d\n", intQueue_deQueue(queueTwo));
+    printf("%d\n", intQueue_deQueue(queueTwo));
+    printf("%d\n", intQueue_deQueue(queueTwo));
+
+    intQueue_enQueue(queueOne, 10);
+
+    printf("%d\n", intQueue_deQueue(queueOne));
+    printf("%d\n", intQueue_deQueue(queueOne));
 }
