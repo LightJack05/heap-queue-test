@@ -2,14 +2,6 @@
 #include <stdio.h>
 #include "queue.c"
 
-// Generic test
-
-#define defineSizeOf(T)       \
-    int sizeOf(T value)       \
-    {                         \
-        return sizeof(value); \
-    }
-
 int main()
 {
     defineGenericQueue(int);
