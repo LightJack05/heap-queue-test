@@ -1,62 +1,77 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct intQueueElement
-{
-    int data;
-    struct intQueueElement *ptrNextElement; // Pointer to the next element in the queue, enqueued later
-};
+/*
+Example usage:
 
-struct intQueue
-{
-    struct intQueueElement *end;   // Pointer to last element enqueued
-    struct intQueueElement *start; // Pointer to first element in queue
-};
+struct Queue *queueOne = (struct Queue *)malloc(sizeof(struct Queue));
+queueOne->start = NULL;
+intQueue_enQueue(queueOne, 5);
+intQueue_enQueue(queueOne, 6);
+intQueue_enQueue(queueOne, 4);
 
-/// @brief Check if the Queue is empty
-/// @return 1 if empty, 0 if not
-int intQueue_isQueueEmpty(struct intQueue *queue)
-{
-    return (queue->start == NULL);
-}
+printf("%d\n", intQueue_deQueue(queueOne));
+printf("%d\n", intQueue_deQueue(queueOne));
+printf("%d\n", intQueue_deQueue(queueOne));
+*/
 
-/// @brief Add an element to the queue
-/// @param element Element to add
-void intQueue_enQueue(struct intQueue *queue, int data)
-{
-    struct intQueueElement *newElement = (struct intQueueElement *)malloc(sizeof(struct intQueueElement));
-    newElement->data = data;
-    newElement->ptrNextElement = NULL;
-    if (intQueue_isQueueEmpty(queue))
-    {
-        queue->start = newElement;
-        queue->end = newElement;
+#define defineGenericQueue(T)                                                                                  \
+    struct QueueElement##T                                                                                     \
+    {                                                                                                          \
+        T data;                                                                                                \
+        struct QueueElement##T *ptrNextElement; /*Pointer to the next element in the queue, enqueued later*/   \
+    };                                                                                                         \
+                                                                                                               \
+    struct Queue##T                                                                                            \
+    {                                                                                                          \
+        struct QueueElement##T *end;   /* Pointer to last element enqueued*/                                   \
+        struct QueueElement##T *start; /* Pointer to first element in queue*/                                  \
+    };                                                                                                         \
+                                                                                                               \
+    int isQueueEmpty##T(struct Queue##T *queue)                                                                \
+    {                                                                                                          \
+        return (queue->start == NULL);                                                                         \
+    }                                                                                                          \
+                                                                                                               \
+    void enQueue##T(struct Queue##T *queue, T data)                                                            \
+    {                                                                                                          \
+        struct QueueElement##T *newElement = (struct QueueElement##T *)malloc(sizeof(struct QueueElement##T)); \
+        newElement->data = data;                                                                               \
+        newElement->ptrNextElement = NULL;                                                                     \
+        if (isQueueEmpty##T(queue))                                                                            \
+        {                                                                                                      \
+            queue->start = newElement;                                                                         \
+            queue->end = newElement;                                                                           \
+        }                                                                                                      \
+        else                                                                                                   \
+        {                                                                                                      \
+            queue->end->ptrNextElement = newElement;                                                           \
+        }                                                                                                      \
+        queue->end = newElement;                                                                               \
+    }                                                                                                          \
+                                                                                                               \
+    int deQueue##T(struct Queue##T *queue)                                                                     \
+    {                                                                                                          \
+        if (isQueueEmpty##T(queue))                                                                            \
+        {                                                                                                      \
+            return NULL;                                                                                       \
+        }                                                                                                      \
+        if (queue->start->ptrNextElement == NULL)                                                              \
+        {                                                                                                      \
+            T lastValue = queue->start->data;                                                                  \
+            free(queue->start);                                                                                \
+            queue->start = NULL;                                                                               \
+            return lastValue;                                                                                  \
+        }                                                                                                      \
+        T startValue = queue->start->data;                                                                     \
+        struct QueueElement##T *newStart = queue->start->ptrNextElement;                                       \
+        free(queue->start);                                                                                    \
+        queue->start = newStart;                                                                               \
+        return startValue;                                                                                     \
     }
-    else
-    {
-        queue->end->ptrNextElement = newElement;
-    }
-    queue->end = newElement;
-}
 
-/// @brief Remove the first element from the queue
-/// @return The removed element
-int intQueue_deQueue(struct intQueue *queue)
-{
-    if (intQueue_isQueueEmpty(queue))
-    {
-        return NULL;
-    }
-    if (queue->start->ptrNextElement == NULL)
-    {
-        int lastValue = queue->start->data;
-        free(queue->start);
-        queue->start = NULL;
-        return lastValue;
-    }
-    int startValue = queue->start->data;
-    struct intQueueElement *newStart = queue->start->ptrNextElement;
-    free(queue->start);
-    queue->start = newStart;
-    return startValue;
-}
+#define QueueElement(T) QueueElement##T
+#define Queue(T) Queue##T
+#define isQueueEmpty(T) isQueueEmpty##T
+#define enQueue(T) enQueue##T
+#define deQueue(T) deQueue##T
